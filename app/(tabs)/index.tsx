@@ -1,9 +1,16 @@
-import { Image } from "expo-image";
-import { FlatList, StyleSheet, Text } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { Link, useRouter } from "expo-router";
 
 export default function HomeScreen() {
+  const navigation = useRouter();
   const data = [
     { id: 1, title: "Item" },
     { id: 2, title: "Item" },
@@ -13,15 +20,14 @@ export default function HomeScreen() {
     { id: 6, title: "Item" },
   ];
 
+  function navigateToScreen() {
+    navigation.navigate("/nested/2");
+  }
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={{ uri: "https://cdn2.hubspot.net/hubfs/53/image8-2.jpg" }}
-          style={styles.reactLogo}
-        />
-      }
+      headerImage={<Link href="/some-route">Some new route</Link>}
     >
       {/* <ScrollView style={{ backgroundColor: "white", height: 50 }}> */}
       {/* <Text style={styles.text}>Hello</Text>
@@ -50,19 +56,56 @@ export default function HomeScreen() {
           Press me
         </TouchableOpacity> */}
       {/* </ScrollView> */}
+      <TouchableOpacity
+        style={{ backgroundColor: "white", padding: 16 }}
+        onPress={navigateToScreen}
+      >
+        <Text>Navigate</Text>
+      </TouchableOpacity>
+
       <FlatList
         data={data}
         renderItem={({ item, index }) => (
-          <Text style={styles.text}>{item.title + " " + index}</Text>
+          <View style={styles.textContainer}>
+            <View
+              style={{
+                height: "100%",
+                width: "25%",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={styles.text}>{item.title + " " + index}</Text>
+            </View>
+          </View>
         )}
-        style={{ backgroundColor: "white", height: 50 }}
+        style={styles.flatList}
+        contentContainerStyle={{ gap: 16 }}
       />
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  text: { color: "red" },
+  textContainer: {
+    // flexDirection: "row", // "row" is horizontal, "column" is vertical
+    // justifyContent: "center", // same orientation as flexDirection
+    // alignItems: "flex-start", // opposite orientation from flexDirection
+
+    height: 100,
+    borderWidth: 1,
+    // paddingLeft: 16,
+  },
+  text: {
+    color: "red",
+    borderColor: "red",
+  },
+  flatList: {
+    backgroundColor: "white",
+    height: 500,
+    padding: 16,
+  },
   button: { width: 100, height: 100, backgroundColor: "red" },
   step3: {
     marginTop: 200,
