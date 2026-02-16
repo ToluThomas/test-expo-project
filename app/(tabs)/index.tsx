@@ -7,10 +7,21 @@ import {
 } from "react-native";
 
 import ParallaxScrollView from "@/components/parallax-scroll-view";
+import axios from "axios";
 import { Link, useRouter } from "expo-router";
+import { useEffect, useLayoutEffect, useState } from "react";
+
+const LONGITUDE = "6.438706";
+const LATITUDE = "3.522862";
+const API_KEY = "1ef25b303c8e3862bfa13549a597954d";
+const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${API_KEY}&units=metric`;
 
 export default function HomeScreen() {
   const navigation = useRouter();
+
+  const [temperature, setTemperature] = useState<string>("");
+  const [error, setError] = useState("");
+
   const data = [
     { id: 1, title: "Item" },
     { id: 2, title: "Item" },
@@ -24,11 +35,90 @@ export default function HomeScreen() {
     navigation.navigate("/nested/2");
   }
 
+  function someFunction() {
+    console.log("I ran some function before the browser paints anything");
+  }
+
+  async function getWeatherWithFetch() {
+    // try {
+    //   const response = await fetch(WEATHER_API_URL);
+
+    //   if (!response.ok) {
+    //     throw Error("Invalid location");
+    //   }
+
+    //   const responseJson = await response.json();
+    //   console.log("responseJson", responseJson);
+
+    //   const newTemperature = responseJson?.main?.temp ?? "37";
+    //   setTemperature(newTemperature);
+    // } catch (error) {
+    //   if (error) {
+    //     setError(error?.message ?? error);
+    //   }
+    // } finally {
+    //   console.log("We tried to fetch weather");
+    // }
+
+    fetch(WEATHER_API_URL)
+      .then((response) => {
+        if (!response.ok) {
+          throw Error("Invalid location");
+        }
+
+        return response.json();
+      })
+      .then((responseJson) => {
+        console.log("responseJson", responseJson);
+        const newTemperature = responseJson?.main?.temp ?? "37";
+        setTemperature(newTemperature);
+      })
+      .catch((error) => {
+        if (error) {
+          setError(error?.message ?? error);
+        }
+      })
+      .finally(() => {
+        console.log("We tried to fetch weather");
+      });
+  }
+
+  function fetchWithAxios() {
+    axios
+      .get(WEATHER_API_URL)
+      .then((response) => {
+        const newTemperature = response?.data?.main?.temp ?? "37";
+        console.log("axios response", response);
+        setTemperature(newTemperature);
+      })
+      .catch((error) => {
+        if (error) {
+          setError(error?.message ?? error);
+        }
+      })
+      .finally(() => {
+        console.log("We tried to fetch weather");
+      });
+  }
+
+  useLayoutEffect(() => {
+    someFunction();
+  }, []);
+
+  useEffect(() => {
+    // getWeatherWithFetch();
+    fetchWithAxios();
+  }, []);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
       headerImage={<Link href="/some-route">Some new route</Link>}
     >
+      <Text
+        style={{ color: "white", fontSize: 20 }}
+      >{`${temperature} °C`}</Text>
+
       {/* <ScrollView style={{ backgroundColor: "white", height: 50 }}> */}
       {/* <Text style={styles.text}>Hello</Text>
       <Text style={styles.text}>Hello</Text>
