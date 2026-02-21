@@ -7,10 +7,17 @@ import {
 } from "react-native";
 
 import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
+import {
+  getTemperatureFromRedux,
+  saveTemperatureToRedux,
+} from "@/redux/weatherSlice";
 import axios from "axios";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
+import EncryptedStorage from "react-native-encrypted-storage";
 
+const TEMPERATURE_STORAGE_KEY = "temperature";
 const LONGITUDE = "6.438706";
 const LATITUDE = "3.522862";
 const API_KEY = "1ef25b303c8e3862bfa13549a597954d";
@@ -18,6 +25,8 @@ const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${L
 
 export default function HomeScreen() {
   const navigation = useRouter();
+  const dispatch = useAppDispatch();
+  const temperatureFromRedux = useAppSelector(getTemperatureFromRedux);
 
   const [temperature, setTemperature] = useState<string>("");
   const [error, setError] = useState("");
@@ -83,13 +92,23 @@ export default function HomeScreen() {
       });
   }
 
+  async function getPersistedTemperature() {
+    return await EncryptedStorage.getItem(TEMPERATURE_STORAGE_KEY);
+  }
+
+  async function persistTemperature(newTemperature: string) {
+    await EncryptedStorage.setItem(TEMPERATURE_STORAGE_KEY, newTemperature);
+  }
+
   function fetchWithAxios() {
     axios
       .get(WEATHER_API_URL)
-      .then((response) => {
+      .then(async (response) => {
         const newTemperature = response?.data?.main?.temp ?? "37";
         console.log("axios response", response);
         setTemperature(newTemperature);
+        // await persistTemperature(String(newTemperature));
+        dispatch(saveTemperatureToRedux(newTemperature));
       })
       .catch((error) => {
         if (error) {
@@ -100,6 +119,26 @@ export default function HomeScreen() {
         console.log("We tried to fetch weather");
       });
   }
+
+  async function updateTemperatureFromStorage() {
+    const newTemperature = await getPersistedTemperature();
+
+    if (newTemperature) {
+      setTemperature(newTemperature);
+    }
+  }
+
+  function updateTemperatureFromRedux() {
+    console.log("temperatureFromRedux", temperatureFromRedux);
+    if (temperatureFromRedux) {
+      setTemperature(temperatureFromRedux);
+    }
+  }
+
+  useLayoutEffect(() => {
+    // updateTemperatureFromStorage();
+    updateTemperatureFromRedux();
+  }, []);
 
   useLayoutEffect(() => {
     someFunction();
