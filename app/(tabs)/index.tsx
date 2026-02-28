@@ -10,12 +10,14 @@ import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
   getTemperatureFromRedux,
+  getWeatherConditionFromRedux,
   saveTemperatureToRedux,
+  saveWeatherConditionToRedux,
 } from "@/redux/weatherSlice";
 import axios from "axios";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
-import EncryptedStorage from "react-native-encrypted-storage";
+// import EncryptedStorage from "react-native-encrypted-storage";
 
 const TEMPERATURE_STORAGE_KEY = "temperature";
 const LONGITUDE = "6.438706";
@@ -27,6 +29,7 @@ export default function HomeScreen() {
   const navigation = useRouter();
   const dispatch = useAppDispatch();
   const temperatureFromRedux = useAppSelector(getTemperatureFromRedux);
+  const weatherFromRedux = useAppSelector(getWeatherConditionFromRedux);
 
   const [temperature, setTemperature] = useState<string>("");
   const [error, setError] = useState("");
@@ -93,11 +96,12 @@ export default function HomeScreen() {
   }
 
   async function getPersistedTemperature() {
-    return await EncryptedStorage.getItem(TEMPERATURE_STORAGE_KEY);
+    // return await EncryptedStorage.getItem(TEMPERATURE_STORAGE_KEY);
+    return "";
   }
 
   async function persistTemperature(newTemperature: string) {
-    await EncryptedStorage.setItem(TEMPERATURE_STORAGE_KEY, newTemperature);
+    // await EncryptedStorage.setItem(TEMPERATURE_STORAGE_KEY, newTemperature);
   }
 
   function fetchWithAxios() {
@@ -105,10 +109,13 @@ export default function HomeScreen() {
       .get(WEATHER_API_URL)
       .then(async (response) => {
         const newTemperature = response?.data?.main?.temp ?? "37";
+        const newWeatherCondition =
+          response?.data?.weather?.description ?? "no data";
         console.log("axios response", response);
         setTemperature(newTemperature);
         // await persistTemperature(String(newTemperature));
         dispatch(saveTemperatureToRedux(newTemperature));
+        dispatch(saveWeatherConditionToRedux(newWeatherCondition));
       })
       .catch((error) => {
         if (error) {
