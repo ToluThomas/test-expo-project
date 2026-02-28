@@ -108,10 +108,11 @@ export default function HomeScreen() {
     axios
       .get(WEATHER_API_URL)
       .then(async (response) => {
-        const newTemperature = response?.data?.main?.temp ?? "37";
-        const newWeatherCondition =
-          response?.data?.weather?.description ?? "no data";
-        console.log("axios response", response);
+        const responseData = response?.data;
+        const newTemperature = responseData?.main?.temp ?? "37";
+        const weatherItem = responseData?.weather?.[0];
+        const newWeatherCondition = weatherItem?.description ?? "no data";
+        console.log("axios response", responseData);
         setTemperature(newTemperature);
         // await persistTemperature(String(newTemperature));
         dispatch(saveTemperatureToRedux(newTemperature));
@@ -156,6 +157,8 @@ export default function HomeScreen() {
     fetchWithAxios();
   }, []);
 
+  console.log("weatherFromRedux", weatherFromRedux);
+
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
@@ -163,7 +166,7 @@ export default function HomeScreen() {
     >
       <Text
         style={{ color: "white", fontSize: 20 }}
-      >{`${temperature} °C`}</Text>
+      >{`${temperature} °C, ${weatherFromRedux}`}</Text>
 
       {/* <ScrollView style={{ backgroundColor: "white", height: 50 }}> */}
       {/* <Text style={styles.text}>Hello</Text>
