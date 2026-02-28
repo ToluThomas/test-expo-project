@@ -7,6 +7,7 @@ import {
 } from "react-native";
 
 import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { ThemedText } from "@/components/themed-text";
 import { useAppDispatch, useAppSelector } from "@/hooks/hooks";
 import {
   getTemperatureFromRedux,
@@ -164,9 +165,7 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
       headerImage={<Link href="/some-route">Some new route</Link>}
     >
-      <Text
-        style={{ color: "white", fontSize: 20 }}
-      >{`${temperature} °C, ${weatherFromRedux}`}</Text>
+      <ThemedText>{`${temperature} °C, ${weatherFromRedux}`}</ThemedText>
 
       {/* <ScrollView style={{ backgroundColor: "white", height: 50 }}> */}
       {/* <Text style={styles.text}>Hello</Text>
