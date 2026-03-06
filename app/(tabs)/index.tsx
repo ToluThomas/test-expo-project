@@ -19,6 +19,7 @@ import axios from "axios";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
 // import EncryptedStorage from "react-native-encrypted-storage";
+import { useFonts } from "expo-font";
 
 const TEMPERATURE_STORAGE_KEY = "temperature";
 const LONGITUDE = "6.438706";
@@ -27,13 +28,16 @@ const API_KEY = "1ef25b303c8e3862bfa13549a597954d";
 const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${API_KEY}&units=metric`;
 
 export default function HomeScreen() {
+  const [fontLoaded, fontError] = useFonts({
+    Betania: require("../../assets/fonts/BetaniaPatmosInGDL-Regular.ttf"),
+  });
   const navigation = useRouter();
   const dispatch = useAppDispatch();
   const temperatureFromRedux = useAppSelector(getTemperatureFromRedux);
   const weatherFromRedux = useAppSelector(getWeatherConditionFromRedux);
 
   const [temperature, setTemperature] = useState<string>("");
-  const [error, setError] = useState("");
+  const [weatherError, setError] = useState("");
 
   const data = [
     { id: 1, title: "Item" },
@@ -158,6 +162,12 @@ export default function HomeScreen() {
     fetchWithAxios();
   }, []);
 
+  useEffect(() => {
+    if (fontLoaded && !fontError) {
+      console.log("font loaded");
+    }
+  }, [fontError, fontLoaded]);
+
   console.log("weatherFromRedux", weatherFromRedux);
 
   return (
@@ -165,7 +175,9 @@ export default function HomeScreen() {
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
       headerImage={<Link href="/some-route">Some new route</Link>}
     >
-      <ThemedText>{`${temperature} °C, ${weatherFromRedux}`}</ThemedText>
+      <ThemedText
+        style={{ fontFamily: "Betania" }}
+      >{`${temperature} °C, ${weatherFromRedux}`}</ThemedText>
 
       {/* <ScrollView style={{ backgroundColor: "white", height: 50 }}> */}
       {/* <Text style={styles.text}>Hello</Text>
