@@ -1,5 +1,3 @@
-import { initializeApp } from "firebase/app";
-
 // Optionally import the services that you want to use
 // import {...} from 'firebase/auth';
 // import {...} from 'firebase/database';
@@ -8,7 +6,7 @@ import { initializeApp } from "firebase/app";
 // import {...} from 'firebase/storage';
 
 // Initialize Firebase
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyBJwBxjP2QgHmxEZrH8uWBNhfpvw9uGlzk",
   authDomain: "expo-c7a7e.firebaseapp.com",
   databaseURL: "https://expo-c7a7e.firebaseio.com",
@@ -19,6 +17,5 @@ const firebaseConfig = {
   //   measurementId: "G-measurement-id",
 };
 
-const app = initializeApp(firebaseConfig);
 // For more information on how to access Firebase in your project,
 // see the Firebase documentation: https://firebase.google.com/docs/web/setup#access-firebase
