@@ -7,11 +7,15 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
+import { firebaseConfig } from "@/firebaseConfig";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { initializeApp } from "firebase/app";
 
 export const unstable_settings = {
   initialRouteName: "index",
 };
+
+export const firebaseApp = initializeApp(firebaseConfig);
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -19,7 +23,8 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="index" options={{ title: "Sign Up" }} />
+        <Stack.Screen name="index" options={{ title: "Sign In" }} />
+        <Stack.Screen name="signUp" options={{ title: "Sign Up" }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen
           name="modal"
