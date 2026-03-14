@@ -1,4 +1,5 @@
 import {
+  Button,
   FlatList,
   StyleSheet,
   Text,
@@ -19,7 +20,10 @@ import axios from "axios";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useLayoutEffect, useState } from "react";
 // import EncryptedStorage from "react-native-encrypted-storage";
+import { isUserLoggedIn, signUserOut } from "@/redux/userSlice";
 import { useFonts } from "expo-font";
+import { getAuth } from "firebase/auth";
+import { firebaseApp } from "../../_layout";
 
 const TEMPERATURE_STORAGE_KEY = "temperature";
 const LONGITUDE = "6.438706";
@@ -29,15 +33,17 @@ const WEATHER_API_URL = `https://api.openweathermap.org/data/2.5/weather?lat=${L
 
 export default function HomeScreen() {
   const [fontLoaded, fontError] = useFonts({
-    Betania: require("../../assets/fonts/BetaniaPatmosInGDL-Regular.ttf"),
+    Betania: require("../../../assets/fonts/BetaniaPatmosInGDL-Regular.ttf"),
   });
   const navigation = useRouter();
   const dispatch = useAppDispatch();
+  const isLoggedIn = useAppSelector(isUserLoggedIn);
   const temperatureFromRedux = useAppSelector(getTemperatureFromRedux);
   const weatherFromRedux = useAppSelector(getWeatherConditionFromRedux);
-
+  console.log("isLoggedIn", isLoggedIn);
   const [temperature, setTemperature] = useState<string>("");
   const [weatherError, setError] = useState("");
+  const auth = getAuth(firebaseApp);
 
   const data = [
     { id: 1, title: "Item" },
@@ -169,15 +175,31 @@ export default function HomeScreen() {
   }, [fontError, fontLoaded]);
 
   console.log("weatherFromRedux", weatherFromRedux);
+  console.log("user", auth.currentUser);
+  function signOut() {
+    auth
+      .signOut()
+      .then((res) => {
+        console.log("signed out", res);
+        dispatch(signUserOut());
+        // navigation.replace("/signUp");
+      })
+      .catch((e) => {
+        console.log("error signing out", e);
+      });
+  }
 
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
       headerImage={<Link href="/some-route">Some new route</Link>}
     >
-      <ThemedText
-        style={{ fontFamily: "Betania" }}
-      >{`${temperature} °C, ${weatherFromRedux}`}</ThemedText>
+      <View style={styles.topTextContainer}>
+        <ThemedText
+          style={{ fontFamily: "Betania" }}
+        >{`${temperature} °C, ${weatherFromRedux}`}</ThemedText>
+        <Button onPress={signOut} title="Sign Out" />
+      </View>
 
       {/* <ScrollView style={{ backgroundColor: "white", height: 50 }}> */}
       {/* <Text style={styles.text}>Hello</Text>
@@ -276,5 +298,10 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: "absolute",
+  },
+  topTextContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
 });

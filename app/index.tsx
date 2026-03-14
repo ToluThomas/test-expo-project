@@ -1,13 +1,14 @@
 import InputField from "@/components/inputField";
 import { ThemedText } from "@/components/themed-text";
+import { useAppDispatch } from "@/hooks/hooks";
+import { signUserIn } from "@/redux/userSlice";
 import { Button } from "@react-navigation/elements";
-import { useRouter } from "expo-router";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 export default function SignIn() {
-  const navigation = useRouter();
+  const dispatch = useAppDispatch();
 
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState("");
@@ -68,7 +69,9 @@ export default function SignIn() {
           // Signed in
           const user = userCredential.user;
 
-          if (user) navigation.navigate("/(tabs)");
+          if (user) {
+            dispatch(signUserIn());
+          }
           console.log("user signed in", user);
         })
         .catch((error) => {

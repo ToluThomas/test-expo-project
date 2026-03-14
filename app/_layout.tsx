@@ -8,35 +8,41 @@ import { StatusBar } from "expo-status-bar";
 import "react-native-reanimated";
 
 import { firebaseConfig } from "@/firebaseConfig";
+import { useAppSelector } from "@/hooks/hooks";
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import { isUserLoggedIn } from "@/redux/userSlice";
+import { store } from "@/store";
 import { initializeApp } from "firebase/app";
-
-export const unstable_settings = {
-  initialRouteName: "index",
-};
+import { Provider } from "react-redux";
 
 export const firebaseApp = initializeApp(firebaseConfig);
 
-export default function RootLayout() {
+function App() {
   const colorScheme = useColorScheme();
+  const isLoggedIn = useAppSelector(isUserLoggedIn);
+  console.log("is logged in from root layout", isLoggedIn);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        <Stack.Screen name="index" options={{ title: "Sign In" }} />
-        <Stack.Screen name="signUp" options={{ title: "Sign Up" }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="modal"
-          options={{ presentation: "modal", title: "Modal" }}
-        />
-        <Stack.Screen
-          name="some-route"
-          options={{ title: "Some Route Component" }}
-        />
-        <Stack.Screen name="nested/[itemId]" options={{ title: "" }} />
+        <Stack.Protected guard={isLoggedIn}>
+          <Stack.Screen name="signedIn" options={{ headerShown: false }} />
+        </Stack.Protected>
+
+        <Stack.Protected guard={!isLoggedIn}>
+          <Stack.Screen name="index" options={{ title: "Sign In" }} />
+          <Stack.Screen name="signUp" options={{ title: "Sign Up" }} />
+        </Stack.Protected>
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <Provider store={store}>
+      <App />
+    </Provider>
   );
 }
