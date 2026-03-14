@@ -2,14 +2,11 @@ import InputField from "@/components/inputField";
 import { ThemedText } from "@/components/themed-text";
 import { Button } from "@react-navigation/elements";
 import { useRouter } from "expo-router";
-import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { firebaseConfig } from "../firebaseConfig";
 
-export default function Register() {
-  initializeApp(firebaseConfig);
+export default function SignIn() {
   const navigation = useRouter();
 
   const [email, setEmail] = useState("");
@@ -18,10 +15,7 @@ export default function Register() {
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
 
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
-
-  const [signUpError, setSignUpError] = useState("");
+  const [loginError, setloginError] = useState("");
 
   function onChangeEmail(text: string) {
     const trimmedText = text.trim();
@@ -61,56 +55,34 @@ export default function Register() {
     setPassword(trimmedPassword);
   }
 
-  function onChangeConfirmPassword(text: string) {
-    const trimmedPassword = text.trim();
+  function onLogin() {
+    if (emailError) console.log("Could not sign in. Email error");
+    if (passwordError) console.log("Could not sign in. password error");
 
-    if (!trimmedPassword) {
-      setConfirmPasswordError("No confirm password entered");
-      setConfirmPassword(trimmedPassword);
-      return;
-    }
-
-    if (trimmedPassword.length < 6) {
-      setConfirmPasswordError("Confirm password is less than 6 characters");
-      setConfirmPassword(trimmedPassword);
-      return;
-    }
-
-    if (trimmedPassword !== password) {
-      setConfirmPasswordError("Password and confirm password are not the same");
-      setConfirmPassword(trimmedPassword);
-      return;
-    }
-
-    setConfirmPasswordError(""); // Clear errors
-    setConfirmPassword(trimmedPassword);
-  }
-
-  function onSignUp() {
-    if (emailError) console.log("Could not sign up. Email error");
-    if (passwordError) console.log("Could not sign up. password error");
-
-    if (!emailError && !passwordError && !confirmPasswordError) {
-      console.log("signing up");
+    if (!emailError && !passwordError) {
+      console.log("logging in");
 
       const auth = getAuth();
-      createUserWithEmailAndPassword(auth, email, password)
+      signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          // Signed up
+          // Signed in
           const user = userCredential.user;
 
           if (user) navigation.navigate("/(tabs)");
-          console.log("user signed up", user);
+          console.log("user signed in", user);
         })
         .catch((error) => {
+          console.log("login error", error);
           const errorCode = error.code;
           let friendlyErrorMessage = "";
 
-          if (errorCode === "auth/email-already-in-use") {
-            friendlyErrorMessage = "User already exists. Please login.";
+          if (errorCode === "auth/invalid-credential") {
+            friendlyErrorMessage = "Invalid email or password.";
           }
 
-          if (friendlyErrorMessage) setSignUpError(friendlyErrorMessage);
+          const errorMessage = friendlyErrorMessage || error.message;
+
+          if (errorMessage) setloginError(errorMessage);
         });
     }
   }
@@ -143,27 +115,12 @@ export default function Register() {
           ) : null}
         </View>
 
-        <View>
-          <ThemedText>Confirm Password</ThemedText>
-          <InputField
-            value={confirmPassword}
-            onChangeText={onChangeConfirmPassword}
-            textContentType="password"
-            secureTextEntry={true}
-          />
-          {confirmPasswordError ? (
-            <ThemedText darkColor="red" lightColor="red">
-              {confirmPasswordError}
-            </ThemedText>
-          ) : null}
-        </View>
-
-        {signUpError ? (
+        {loginError ? (
           <ThemedText darkColor="red" lightColor="red">
-            {signUpError}
+            {loginError}
           </ThemedText>
         ) : null}
-        <Button onPressIn={onSignUp}>Sign Up</Button>
+        <Button onPressIn={onLogin}>Login</Button>
       </View>
     </View>
   );
